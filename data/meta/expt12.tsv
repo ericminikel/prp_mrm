@@ -1,0 +1,19 @@
+prep_date	label	skyline_id	description
+2018-02-01	H1	QQ180327_PrP_Exp12_H1	high PrP CSF sample (2408) replicate 1
+2018-02-01	H2	QQ180327_PrP_Exp12_H2	high PrP CSF sample (2408) replicate 2
+2018-02-01	H3	QQ180327_PrP_Exp12_H3	high PrP CSF sample (2408) replicate 3
+2018-02-01	H4	QQ180327_PrP_Exp12_H4	high PrP CSF sample (2408) replicate 4
+2018-02-01	H5	QQ180327_PrP_Exp12_H5	high PrP CSF sample (2408) replicate 5
+2018-02-01	M1	QQ180327_PrP_Exp12_M1	medium PrP CSF sample (1953) replicate 1
+2018-02-01	M2	QQ180327_PrP_Exp12_M2	medium PrP CSF sample (1953) replicate 2
+2018-02-01	M3	QQ180327_PrP_Exp12_M3	medium PrP CSF sample (1953) replicate 3
+2018-02-01	M4	QQ180327_PrP_Exp12_M4	medium PrP CSF sample (1953) replicate 4
+2018-02-01	M5	QQ180327_PrP_Exp12_M5	medium PrP CSF sample (1953) replicate 5
+2018-02-01	L1	QQ180327_PrP_Exp12_L1	low PrP CSF sample (1921) replicate 1
+2018-02-01	L2	QQ180327_PrP_Exp12_L2	low PrP CSF sample (1921) replicate 2
+2018-02-01	L3	QQ180327_PrP_Exp12_L3	low PrP CSF sample (1921) replicate 3
+2018-02-01	L4	QQ180327_PrP_Exp12_L4	low PrP CSF sample (1921) replicate 4
+2018-02-01	L5	QQ180327_PrP_Exp12_L5	low PrP CSF sample (1921) replicate 5
+2018-02-01	R8	404_PrP_Exp12_Rat8	rat 353208
+2018-02-01	R9	404_PrP_Exp12_Rat9	rat 353209
+2018-02-01	IPC	404_PrP_Exp12_IPC	interplate control (v1205.6+C-IPC)

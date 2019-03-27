@@ -1,0 +1,7 @@
+codons	peptide	mean_intrarun_cv	mean_interrun_cv	interindiv_cv
+25-37	RPKPGGWNTGGSR	6%	25%	63%
+38-48	YPGQGSPGGNR	7%	13%	55%
+137-148	PIIHFGSDYEDR	7%	8%	59%
+195-204	GENFTETDVK	5%	11%	57%
+209-220	VVEQMCITQYER	5%	9%	58%
+221-228	ESQAYYQR	4%	6%	66%

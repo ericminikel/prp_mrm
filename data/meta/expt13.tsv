@@ -1,0 +1,17 @@
+prep_date	label	skyline_id	description
+2018-02-09	N0A	QQ180510_PrP_Exp13_N0A_01	v1238.5 no chaps, transferred 0x, replicate A
+2018-02-09	N0B	QQ180510_PrP_Exp13_N0B_02	v1238.5 no chaps, transferred 0x, replicate B
+2018-02-09	N1A	QQ180510_PrP_Exp13_N1A_01	v1238.5 no chaps, transferred 1x, replicate A
+2018-02-09	N1B	QQ180510_PrP_Exp13_N1B_02	v1238.5 no chaps, transferred 1x, replicate B
+2018-02-09	N2A	QQ180510_PrP_Exp13_N2A_01	v1238.5 no chaps, transferred 2x, replicate A
+2018-02-09	N2B	QQ180510_PrP_Exp13_N2B_02	v1238.5 no chaps, transferred 2x, replicate B
+2018-02-09	N3A	QQ180510_PrP_Exp13_N3A_01	v1238.5 no chaps, transferred 3x, replicate A
+2018-02-09	N3B	QQ180510_PrP_Exp13_N3B_02	v1238.5 no chaps, transferred 3x, replicate B
+2018-02-09	C0A	QQ180510_PrP_Exp13_C0A_01	v1238.5 0.03% chaps, transferred 0x, replicate A
+2018-02-09	C0B	QQ180510_PrP_Exp13_C0B_02	v1238.5 0.03% chaps, transferred 0x, replicate B
+2018-02-09	C1A	QQ180510_PrP_Exp13_C1A_01	v1238.5 0.03% chaps, transferred 1x, replicate A
+2018-02-09	C1B	QQ180510_PrP_Exp13_C1B_02	v1238.5 0.03% chaps, transferred 1x, replicate B
+2018-02-09	C2A	QQ180510_PrP_Exp13_C2A_01	v1238.5 0.03% chaps, transferred 2x, replicate A
+2018-02-09	C2B	QQ180510_PrP_Exp13_C2B_02	v1238.5 0.03% chaps, transferred 2x, replicate B
+2018-02-09	C3A	QQ180510_PrP_Exp13_C3A_01	v1238.5 0.03% chaps, transferred 3x, replicate A
+2018-02-09	C3B	QQ180510_PrP_Exp13_C3B_02	v1238.5 0.03% chaps, transferred 3x, replicate B

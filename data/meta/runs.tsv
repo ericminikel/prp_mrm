@@ -1,0 +1,16 @@
+expt_no	date	metafile	datafile	description
+6	2017-07-07	expt6.tsv	PrP_MRM_Results_Species_Exp6_171030_NewForm.csv	multi-species brain and CSF
+7	2017-10-18	expt7.tsv	PrP_MRM_Results_CSF1-4_Exp7_171109_NewForm.csv	mouse KO and WT brain
+8	2017-11-09	expt8.tsv	PrP_MRM_15Ncurves_plus_blanksCarryoverIPC_Exp8_180117.csv	recombinant recovery (15N incomplete incorporation)
+9	2017-12-11	expt9.tsv	PrP_MRM_MouseAccuracyExp9_180116v4.csv	mouse WT-KO brain homogenate dilution series
+10	2018-01-18	expt10.tsv	Experiment10_20180420.csv	recombinant recovery again (15N incomplete incorporation)
+11	2018-01-26	expt11.tsv	PeptideTotals_PrionProject_Exp11_Monkey_SpikeRecovery_180601.csv	human high/low dilution linearity, monkey variability
+12	2018-02-01	expt12.tsv	Experiment12_20180420.csv	high med low QCs (sample swap issue), rat CSF
+13	2018-02-09	expt13.tsv	PrP_MRM_Plastic_Exp13_180618.csv	plastic transfers with and without CHAPS
+14	2018-07-19	expt14.tsv	Experiment14_20180725.csv	pilot for 15N-based quantification (high 15N incorporation)
+15	2018-07-31	expt15.tsv	PrP_MRM_Experiment15_20180802.csv	15N dose response (high 15N incorporation)
+16	2018-08-14	expt16.tsv	PepReport_Exp16_190115ek.csv	clinical samples batch 1
+17	2018-09-20	expt17.tsv	PepReport_Exp17_190115ek.csv	clinical samples batch 2
+18	2018-10-04	expt18.tsv	PepReport_Exp18_3rdInj_190115ek.csv	clinical samples batch 3
+19	2018-10-10	expt19.tsv	PepReport_Exp19_190115ek.csv	clinical samples batch 4
+20	2018-10-16	expt20.tsv	PepReport_Exp20_190115ek.csv	clinical samples batch 5

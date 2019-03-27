@@ -1,0 +1,19 @@
+prep_date	label	skyline_id	description
+2018-01-26	47-1	Exp11_47_1_02	monkey 47 (female) replicate 1
+2018-01-26	47-2	Exp11_47_2_02	monkey 47 (female) replicate 2
+2018-01-26	47-3	Exp11_47_3_02	monkey 47 (female) replicate 3
+2018-01-26	39-1	Exp11_39_1_02	monkey 39 (male) replicate 1
+2018-01-26	39-2	Exp11_39_2_02	monkey 39 (male) replicate 2
+2018-01-26	39-3	Exp11_39_3_02	monkey 39 (male) replicate 3
+2018-01-26	A100-1	Exp11_A100_01_02	100% A replicate 1
+2018-01-26	A075-1	Exp11_A075_01_02	75% A replicate 1
+2018-01-26	A050-1	Exp11_A050_01_02	50% A replicate 1
+2018-01-26	A025-1	Exp11_A025_01_02	25% A replicate 1
+2018-01-26	A000-1	Exp11_A000_01_02	0% A replicate 1
+2018-01-26	IPC-1	Exp11_IPC_01_02	interplate control replicate 1
+2018-01-26	A100-2	Exp11_A100_02_02	100% A replicate 2
+2018-01-26	A075-2	Exp11_A075_02_02	75% A replicate 2
+2018-01-26	A050-2	Exp11_A050_02_02	50% A replicate 2
+2018-01-26	A025-2	Exp11_A025_02_02	25% A replicate 2
+2018-01-26	A000-2	Exp11_A000_02_02	0% A replicate 2
+2018-01-26	IPC-2	Exp11_IPC_02_02	interplate control replicate 2

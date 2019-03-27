@@ -1,0 +1,7 @@
+codons	peptide	mean_intrarun_cv	mean_interrun_cv	interindiv_cv	mean_ln	implied_ngml
+25-37	RPKPGGWNTGGSR	10%	16%	80%		
+38-48	YPGQGSPGGNR	12%	22%	52%		
+137-148	PIIHFGSDYEDR	10%	12%	56%		
+195-204	GENFTETDVK	9%	12%	58%		
+209-220	VVEQMCITQYER	9%	12%	54%		
+221-228	ESQAYYQR	10%	18%	70%		

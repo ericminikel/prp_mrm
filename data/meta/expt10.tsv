@@ -1,0 +1,25 @@
+prep_date	label	skyline_id	description
+2018-01-18	BLANK	BlankCSF	CSF v1234.4 with no 15N spike and no heavy peptides either
+2018-01-18	ZERO	Zero	CSF v1234.4 with no 15N spike but with heavy peptides as per usual
+2018-01-18	A1	Exp10_A1_01	CSF v1234.4 with 25 ng/mL (putative LLQ) of 15N PrP8 spiked in - replicate 1
+2018-01-18	A2	Exp10_A2_01	CSF v1234.4 with 25 ng/mL (putative LLQ) of 15N PrP8 spiked in - replicate 2
+2018-01-18	A3	Exp10_A3_01	CSF v1234.4 with 25 ng/mL (putative LLQ) of 15N PrP8 spiked in - replicate 3
+2018-01-18	A4	Exp10_A4_01	CSF v1234.4 with 25 ng/mL (putative LLQ) of 15N PrP8 spiked in - replicate 4
+2018-01-18	A5	Exp10_A5_01	CSF v1234.4 with 25 ng/mL (putative LLQ) of 15N PrP8 spiked in - replicate 5
+2018-01-18	B1	Exp10_B1_01	CSF v1234.4 with 50 ng/mL (putative "low") of 15N PrP8 spiked in - replicate 1
+2018-01-18	B2	Exp10_B2_01	CSF v1234.4 with 50 ng/mL (putative "low") of 15N PrP8 spiked in - replicate 2
+2018-01-18	B3	Exp10_B3_01	CSF v1234.4 with 50 ng/mL (putative "low") of 15N PrP8 spiked in - replicate 3
+2018-01-18	B4	Exp10_B4_01	CSF v1234.4 with 50 ng/mL (putative "low") of 15N PrP8 spiked in - replicate 4
+2018-01-18	B5	Exp10_B5_01	CSF v1234.4 with 50 ng/mL (putative "low") of 15N PrP8 spiked in - replicate 5
+2018-01-18	C1	Exp10_C1_01	CSF v1234.4 with 1,000 ng/mL (putative "medium") of 15N PrP8 spiked in - replicate 1
+2018-01-18	C2	Exp10_C2_01	CSF v1234.4 with 1,000 ng/mL (putative "medium") of 15N PrP8 spiked in - replicate 2
+2018-01-18	C3	Exp10_C3_01	CSF v1234.4 with 1,000 ng/mL (putative "medium") of 15N PrP8 spiked in - replicate 3
+2018-01-18	C4	Exp10_C4_01	CSF v1234.4 with 1,000 ng/mL (putative "medium") of 15N PrP8 spiked in - replicate 4
+2018-01-18	C5	Exp10_C5_01	CSF v1234.4 with 1,000 ng/mL (putative "medium") of 15N PrP8 spiked in - replicate 5
+2018-01-18	D1	Exp10_D1_01	CSF v1234.4 with 10,000 ng/mL (putative "high") of 15N PrP8 spiked in - replicate 1
+2018-01-18	D2	Exp10_D2_01	CSF v1234.4 with 10,000 ng/mL (putative "high") of 15N PrP8 spiked in - replicate 2
+2018-01-18	D3	Exp10_D3_01	CSF v1234.4 with 10,000 ng/mL (putative "high") of 15N PrP8 spiked in - replicate 3
+2018-01-18	D4	Exp10_D4_01	CSF v1234.4 with 10,000 ng/mL (putative "high") of 15N PrP8 spiked in - replicate 4
+2018-01-18	D5	Exp10_D5_01	CSF v1234.4 with 10,000 ng/mL (putative "high") of 15N PrP8 spiked in - replicate 5
+2018-01-18	IPC1	Exp10_IPC1_01	interplate control replicate 1
+2018-01-18	IPC2	Exp10_IPC2_01	interplate control replicate 2
