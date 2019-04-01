@@ -801,16 +801,29 @@ write.table(table_s4_joined, 'display_items/script_generated/table-s4.tsv', sep=
 
 
 # calculate response factors and perform normalization
-expt15$nl = 1/expt15$ln
-true_n = 24.2
-for (i in 1:nrow(hupeps)) {
-  m = lm(spike ~ nl + 0, data = subset(expt15, spike > 0 & peptide==hupeps$peptide[i]))
-  hupeps$slope[i] = m$coefficients['nl']
+expt15$nl = 1/expt15$ln # 15N:L ratio is reciprocal of the L:15N ratio
+true_n = 24.2 # true 15N spike concentration in clinical samples = 24.2 ng/mL
+for (i in 1:nrow(hupeps)) { # for each peptide
+  # use dose response experiment data (expt15) for normalization
+  m = lm(spike ~ nl + 0, data = subset(expt15, spike > 0 & peptide==hupeps$peptide[i])) # linear model: spiked 15N concentration (2.4, 24, 240 ng/mL) as a function of 15N:L ratio
+  hupeps$slope[i] = m$coefficients['nl'] # extract the slope for these curves for each peptide. range from 447 for VVEQ to 39 for RPKP
 }
-hupeps$rf = max(hupeps$slope) / hupeps$slope
-clin$rf = hupeps$rf[match(clin$peptide, hupeps$peptide)]
-clin$raw_ngml = clin$ln_mean * true_n
-clin$norm_ngml = clin$ln_mean * clin$rf * true_n
+hupeps$rf = max(hupeps$slope) / hupeps$slope # set response factor equal to the max slope (the one for VVEQ...) divided by each peptide's slope
+clin$rf = hupeps$rf[match(clin$peptide, hupeps$peptide)] # match the response factors into the clin table
+clin$raw_ngml = clin$ln_mean * true_n # calculate the "raw" (non-normalized) ng/mL concentration as the L:15N ratio times the spike concentration (24.2 ng/mL)
+clin$norm_ngml = clin$ln_mean * clin$rf * true_n # calculate the normalized ng/mL concentration as the raw concentration times the response factor
+
+# note: some people found it non-intuitive that the linear model is spike ~ nl + 0 and not spike ~ ln + 0
+# in other words, why is the curve fit to the 15N:L ratio and not the L:15N ratio?
+# the answer is that if you do spike ~ ln + 0, the L:15N ratio is highest for the highest-responding 
+# peptide, so the slope, which is fitted as the coefficient of ln, is lowest for the highest-responding peptide
+# conversely, if you fit spike ~ nl + 0, the 15N:L ratio is lowest for the highest-responding peptide,
+# so its slope is the highest. the above model reflects this, giving a slope of 447 ng/mL for VVEQ and
+# only 39 ng/mL for RPKP. thus the slopes reflect how well the peptides "respond" in terms of light peak area
+# also consider that you want to fix the intercept at 0, in other words, you want to specify 
+# that the model should assume that the 15N:L ratio is 0 when the 15N spike concentration is 0
+# if you model based on L:15N ratio, you can't specify this condition.
+
 
 table_s5_prep = sqldf("
 select   h.peptide, 
