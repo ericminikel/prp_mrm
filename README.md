@@ -1,6 +1,6 @@
-This repository holds the code and data for a manuscript in progress:
+This repository holds the code and data for the following manuscript:
 
-Minikel & Kuhn et al, Domain-specific quantification of PrP in cerebrospinal fluid by targeted mass spectrometry. In preparation.
+[Minikel EV & Kuhn E (equal contribution), Cocco AR, Vallabh SM, Hartigan CR, Reidenbach AG, Safar JG, Raymond GJ, McCarthy MD, O'Keefe R, Llorens F, Zerr I, Capellari S, Parchi P, Schreiber SL, Carr SA. **Domain-specific quantification of prion protein in cerebrospinal fluid by targeted mass spectrometry** bioRxiv 591487; 1 Apr 2019. doi: https://doi.org/10.1101/591487](https://doi.org/10.1101/591487)
 
 In this manuscript we describe prion protein (PrP) multiple reaction monitoring (MRM) &mdash; a targeted mass spec assay &mdash; and what we learned from applying this assay to clinical samples of cerebrospinal fluid from prion disease and non-prion disease patients.
 
