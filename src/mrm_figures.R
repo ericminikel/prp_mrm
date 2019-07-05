@@ -254,7 +254,7 @@ techcv2$mean_mean_lh = signif(techcv2$mean_mean_lh, digits=2)
 techcv2
 
 
-table_s3_prep = sqldf("
+table_s5_prep = sqldf("
                       select   allorder, peptide, modified_sequence, ion, count(*) n_rt, avg(retention_time) mean_rt, stdev(retention_time) sd_rt
                       from     selectivity_data
                       where    expectedness == 'sequence-matched'
@@ -263,19 +263,19 @@ table_s3_prep = sqldf("
                       order by 1, 2, 3, 4
                       ;")
 
-table_s3_prep$mean_lh = techcv2$mean_mean_lh[match(table_s3_prep$peptide, techcv2$peptide)]
-table_s3_prep$n_samp_lh = techcv2$n_samp_lh[match(table_s3_prep$peptide, techcv2$peptide)]
-table_s3_prep$mean_cv = techcv2$mean_cv[match(table_s3_prep$peptide, techcv2$peptide)]
-table_s3_prep$n_samp = techcv2$n_samp[match(table_s3_prep$peptide, techcv2$peptide)]
+table_s5_prep$mean_lh = techcv2$mean_mean_lh[match(table_s5_prep$peptide, techcv2$peptide)]
+table_s5_prep$n_samp_lh = techcv2$n_samp_lh[match(table_s5_prep$peptide, techcv2$peptide)]
+table_s5_prep$mean_cv = techcv2$mean_cv[match(table_s5_prep$peptide, techcv2$peptide)]
+table_s5_prep$n_samp = techcv2$n_samp[match(table_s5_prep$peptide, techcv2$peptide)]
 
-table_s3_prep$retention_time = paste(formatC(table_s3_prep$mean_rt, format='f', digits=1), '±', formatC(table_s3_prep$sd_rt, format='f', digits=1), ' (N=', table_s3_prep$n_rt, ')', sep='')
-table_s3_prep$lh = paste(formatC(table_s3_prep$mean_lh, format='f', digits=1), ' (N=', table_s3_prep$n_samp_lh, ')', sep='')
-table_s3_prep$cv = paste(percent(table_s3_prep$mean_cv), ' (N=', table_s3_prep$n_samp, ')', sep='')
+table_s5_prep$retention_time = paste(formatC(table_s5_prep$mean_rt, format='f', digits=1), '±', formatC(table_s5_prep$sd_rt, format='f', digits=1), ' (N=', table_s5_prep$n_rt, ')', sep='')
+table_s5_prep$lh = paste(formatC(table_s5_prep$mean_lh, format='f', digits=1), ' (N=', table_s5_prep$n_samp_lh, ')', sep='')
+table_s5_prep$cv = paste(percent(table_s5_prep$mean_cv), ' (N=', table_s5_prep$n_samp, ')', sep='')
 
-table_s3 = table_s3_prep[,c('allorder','peptide','ion','retention_time','lh','cv')]
-table_s3
+table_s5 = table_s5_prep[,c('allorder','peptide','ion','retention_time','lh','cv')]
+table_s5
 
-write.table(table_s3, 'display_items/script_generated/table-s3.tsv',sep='\t',col.names=T,row.names=F,quote=F)
+write.table(table_s5, 'display_items/script_generated/table-s5.tsv',sep='\t',col.names=T,row.names=F,quote=F)
 
 # stats for table S1 legend
 length(unique(paste(selectivity_data$run, selectivity_data$label)))
@@ -825,7 +825,7 @@ clin$norm_ngml = clin$ln_mean * clin$rf * true_n # calculate the normalized ng/m
 # if you model based on L:15N ratio, you can't specify this condition.
 
 
-table_s5_prep = sqldf("
+table_s3_prep = sqldf("
 select   h.peptide, 
          cast(round(avg(light)/1000000,2) as text)||'±'||cast(round(stdev(light)/1000000,2) as text) meansd_light,
          cast(round(avg(n15)/1000000,2) as text)||'±'||cast(round(stdev(n15)/1000000,2) as text) meansd_n15,
@@ -840,16 +840,16 @@ order by h.ncorder
 ;")
 
 # average normalized PrP concentration across all peptides
-mean(table_s5_prep$norm_ngml)
+mean(table_s3_prep$norm_ngml)
 
-table_s5_disp = table_s5_prep
-table_s5_disp$raw_ngml = round(table_s5_disp$raw_ngml, 0)
-table_s5_disp$respfact = round(table_s5_disp$respfact, 1)
-table_s5_disp$norm_ngml = round(table_s5_disp$norm_ngml, 0)
+table_s3_disp = table_s3_prep
+table_s3_disp$raw_ngml = round(table_s3_disp$raw_ngml, 0)
+table_s3_disp$respfact = round(table_s3_disp$respfact, 1)
+table_s3_disp$norm_ngml = round(table_s3_disp$norm_ngml, 0)
 
-table_s5_disp
+table_s3_disp
 
-write.table(table_s5_disp, 'display_items/script_generated/table-s5.tsv',sep='\t',col.names=T,row.names=F,quote=F)
+write.table(table_s3_disp, 'display_items/script_generated/table-s3.tsv',sep='\t',col.names=T,row.names=F,quote=F)
 
 
 
@@ -980,38 +980,38 @@ for (currpeptide in peptides$peptide[peptides$human=='yes']) {
 clin$percentile = (clin$ln_rank-1)/(nrow(clin)/6)
 clin$quartile = floor(clin$percentile * 4)/4
 
-table_s6_prep = sqldf("
+table_s4_prep = sqldf("
                       select   peptide, quartile, avg(ln_sd/ln_mean) mean_cv, avg(ln_mean) mean_ln
                       from     clin
                       where    ln_mean is not null and ln_sd is not null
                       group by 1, 2
                       order by 1, 2
                       ;")
-table_s6_prep
+table_s4_prep
 
-table_s6_left = dcast(table_s6_prep, peptide ~ quartile, value.var='mean_cv')
-table_s6_right = dcast(table_s6_prep, peptide ~ quartile, value.var='mean_ln')
+table_s4_left = dcast(table_s4_prep, peptide ~ quartile, value.var='mean_cv')
+table_s4_right = dcast(table_s4_prep, peptide ~ quartile, value.var='mean_ln')
 
 for (i in 2:5) {
-  table_s6_left[,i] = gsub(' ','',paste(formatC(table_s6_left[,i]*100, digits=1, format='f'),"%",sep="") )
+  table_s4_left[,i] = gsub(' ','',paste(formatC(table_s4_left[,i]*100, digits=1, format='f'),"%",sep="") )
 }
 
 for (i in 2:5) {
-  table_s6_right[,i] = formatC(table_s6_right[,i], format='f', digits=1)
+  table_s4_right[,i] = formatC(table_s4_right[,i], format='f', digits=1)
 }
 
-table_s6_joined = sqldf("
+table_s4_joined = sqldf("
                         select   p.ncorder, p.peptide, l.*, r.*
-                        from     peptides p, table_s6_left l, table_s6_right r
+                        from     peptides p, table_s4_left l, table_s4_right r
                         where    p.peptide = l.peptide and p.peptide = r.peptide
                         ;")
-table_s6_joined = table_s6_joined[,c(-3, -8)] # delete the extraneous "peptide" cols
-table_s6_joined = table_s6_joined[,-1] # delete the ncorder col
+table_s4_joined = table_s4_joined[,c(-3, -8)] # delete the extraneous "peptide" cols
+table_s4_joined = table_s4_joined[,-1] # delete the ncorder col
 
-colnames(table_s6_joined) = c('peptide','cv0_24','cv25_49','cv50_74','cv75_100','mean0_24','mean25_49','mean50_74','mean75_100')
+colnames(table_s4_joined) = c('peptide','cv0_24','cv25_49','cv50_74','cv75_100','mean0_24','mean25_49','mean50_74','mean75_100')
 
-write.table(table_s6_joined, 'display_items/script_generated/table-s6.tsv', sep='\t', col.names=T, row.names=F, quote=F)
-#### -- End Table S6
+write.table(table_s4_joined, 'display_items/script_generated/table-s4.tsv', sep='\t', col.names=T, row.names=F, quote=F)
+#### -- End Table S4
 
 
 
