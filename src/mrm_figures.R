@@ -293,10 +293,11 @@ ngml = masspervol * (1e9) / (1e3) # convert g/L to ng/ML
 
 
 # Figure 5. Application of the PrP MRM assay for preclinical species of interest
-# A (was S5B): Selectivity data collapsed by peptide
-# B (was S5E): Dilution linearity of mouse peptides in brain homogenate
-imgsave(paste('display_items/script_generated/figure-5.',imgmode,sep=''),width=6.5*resx,height=3.5*resx,res=resx)
-layout_matrix = matrix(c(1,2),nrow=1,byrow=T)
+# A: grid of expected peptide results based on sequence match
+# B (was S5B): Selectivity data collapsed by peptide
+# C (was S5E): Dilution linearity of mouse peptides in brain homogenate
+imgsave(paste('display_items/script_generated/figure-5.',imgmode,sep=''),width=6.5*resx,height=3*resx,res=resx)
+layout_matrix = matrix(c(1,1,1,2,2,3,3),nrow=1,byrow=T)
 layout(layout_matrix)
 
 y_axis_data = sqldf("
@@ -308,19 +309,43 @@ y_axis_data = sqldf("
 y_axis_data$color = selectivity_legend$col[match(y_axis_data$expectedness,selectivity_legend$label)]
 selectivity_data$color = selectivity_legend$col[match(selectivity_data$expectedness,selectivity_legend$label)]
 ylims = c(min(y_axis_data$y)-.5, max(y_axis_data$y)+.5) # for one species: c(min(peptides$allorder)-.5, max(peptides$allorder)+.5)
-xlims = c(floor(min(log10(selectivity_data$lh))), ceiling(max(log10(selectivity_data$lh))))
-xats = min(xlims):max(xlims)
-collapsed_ylims=c(-9.5,-.5)
 selectivity_data$y_collapsed = -peptides$allorder[match(selectivity_data$peptide,peptides$peptide)]
-par(mar=c(4,8,3,2))
+collapsed_ylims=c(-9.5,-.5)
+
+par(mar=c(5,10,5,2))
+xlims = c(0.5,3.0)
+species = c('human','cynomolgus','mouse','rat') # colnames(peptides)[4:7]
+species_x = c(1,1.5,2,2.5)
 plot(NA,NA,xlim=xlims,ylim=collapsed_ylims,ann=FALSE,axes=FALSE,xaxs='i',yaxs='i')
-axis(side=1,at=xats)
-mtext(side=1, line=2.5, text='log10(L:H ratio)')
-mtext(side=2,at=-peptides$allorder,text=peptides$peptide,font=1,las=2,cex=0.8)
-points(x=log10(selectivity_data$lh), y=selectivity_data$y_collapsed, col=selectivity_data$color, pch=20)
+mtext(side=2,at=-peptides$allorder,text=peptides$peptide,col=peptides$color,font=1,las=2,cex=0.8)
+species_matrix = as.matrix(peptides[,species] == 'yes')
+mtext(side=1, line=0.5, text='sequence expected')
+par(xpd=T)
+points(x=c(1,2), y=rep(min(collapsed_ylims),2)-1.5, pch=c(15,4), lwd=c(NA,2), col=selectivity_legend$col, cex=1.1)
+text(x=c(1,2), y=rep(min(collapsed_ylims),2)-1.5, pos=4, col=selectivity_legend$col, labels=c('yes','no'), cex=1.1)
+text(x=species_x, y=rep(max(collapsed_ylims),4)+0.5, labels=species, adj=c(0,0), srt=45)
+par(xpd=F)
+for (row in 1:nrow(species_matrix)) {
+  for (col in 1:ncol(species_matrix)) {
+    if (species_matrix[row,col]) {
+      points(species_x[col], -row, pch=15, col=selectivity_legend$col[selectivity_legend$label=='sequence-matched'])
+    } else {
+      points(species_x[col], -row, pch=4, lwd=2, col=selectivity_legend$col[selectivity_legend$label=='not matched'])
+    }
+  }
+}
 mtext('A', side=3, cex=2, adj = -0.9, line = 0.3)
 
-# TO DO: maybe add a grid to (A) with which species are represented
+par(mar=c(5,1,5,2))
+xlims = c(floor(min(log10(selectivity_data$lh))), ceiling(max(log10(selectivity_data$lh))))
+xats = min(xlims):max(xlims)
+plot(NA,NA,xlim=xlims,ylim=collapsed_ylims,ann=FALSE,axes=FALSE,xaxs='i',yaxs='i')
+abline(v=xats, lwd=0.25)
+axis(side=1,at=xats)
+mtext(side=1, line=2.5, text='observed abundance')
+mtext(side=1, line=3.5, text='log10(L:H)', cex=0.8)
+points(x=log10(selectivity_data$lh), y=selectivity_data$y_collapsed, col=selectivity_data$color, pch=20)
+mtext('B', side=3, cex=2, adj = -0.2, line = 0.3)
 
 mocurve = subset(mrm_data, run == 9)
 mocurve$fracwt = as.numeric(gsub('x.*','',mocurve$description))
@@ -369,22 +394,24 @@ for (i in 1:nrow(best_mo_peptides)) {
 }
 percent(range(best_mo_peptides$adjr2),digits=3)
 
-par(mar=c(4,4,3,2))
+par(mar=c(5,3,5,3))
 plot(NA, NA, xlim=c(-0.05,1.05), ylim=c(0,1.1), xaxs='i', yaxs='i', ann=FALSE, axes=FALSE)
 axis(side=1, at=unique(mo_rel$fracwt), labels=NA, lwd=1, lwd.ticks=1, tck=-0.02)
-axis(side=1, at=c(0,.5,1), labels=c('100% KO','50/50 mix','100% WT'), lwd=0, lwd.ticks=1, tck=-0.05)
+axis(side=1, at=c(0,.5,1), labels=c('100%\nKO','50/50\nmix','100%\nWT'), lwd=0, lwd.ticks=1, tck=-0.05, cex.axis=0.8)
 axis(side=2, at=(0:4)/4, labels=percent((0:4)/4), lwd=1, lwd.ticks=1, las=2)
-mtext(side=1, line=2.5, text='mixture proportion of 0.5% BH')
+mtext(side=1, line=2.5, text='BH mixture proportion')
 mtext(side=2, line=3, text='normalized L:H ratio')
 set.seed(1)
 points(jitter(mo_rel$fracwt,amount=0.025), mo_rel$rel, col=mo_rel$col, pch=20)
 for (i in 1:nrow(best_mo_peptides)) {
   abline(a=best_mo_peptides$intercept[i], b=best_mo_peptides$slope[i], lwd=1, col=best_mo_peptides$col[i])
 }
-legend('topleft', best_mo_peptides$peptide, pch=20, lwd=1, col=best_mo_peptides$col, text.col=best_mo_peptides$col, text.font=1, cex=0.7, bty='n')
-mtext('B', side=3, cex=2, adj = -0.2, line = 0.3)
+legend('topleft', best_mo_peptides$peptide, pch=20, lwd=1, col=best_mo_peptides$col, text.col=best_mo_peptides$col, text.font=1, cex=0.65, bty='n')
+mtext('C', side=3, cex=2, adj = -0.2, line = 0.3)
 
 dev.off()
+
+
 
 
 
