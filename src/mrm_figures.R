@@ -254,7 +254,7 @@ techcv2$mean_mean_lh = signif(techcv2$mean_mean_lh, digits=2)
 techcv2
 
 
-table_s3_prep = sqldf("
+table_s5_prep = sqldf("
                       select   allorder, peptide, modified_sequence, ion, count(*) n_rt, avg(retention_time) mean_rt, stdev(retention_time) sd_rt
                       from     selectivity_data
                       where    expectedness == 'sequence-matched'
@@ -263,19 +263,19 @@ table_s3_prep = sqldf("
                       order by 1, 2, 3, 4
                       ;")
 
-table_s3_prep$mean_lh = techcv2$mean_mean_lh[match(table_s3_prep$peptide, techcv2$peptide)]
-table_s3_prep$n_samp_lh = techcv2$n_samp_lh[match(table_s3_prep$peptide, techcv2$peptide)]
-table_s3_prep$mean_cv = techcv2$mean_cv[match(table_s3_prep$peptide, techcv2$peptide)]
-table_s3_prep$n_samp = techcv2$n_samp[match(table_s3_prep$peptide, techcv2$peptide)]
+table_s5_prep$mean_lh = techcv2$mean_mean_lh[match(table_s5_prep$peptide, techcv2$peptide)]
+table_s5_prep$n_samp_lh = techcv2$n_samp_lh[match(table_s5_prep$peptide, techcv2$peptide)]
+table_s5_prep$mean_cv = techcv2$mean_cv[match(table_s5_prep$peptide, techcv2$peptide)]
+table_s5_prep$n_samp = techcv2$n_samp[match(table_s5_prep$peptide, techcv2$peptide)]
 
-table_s3_prep$retention_time = paste(formatC(table_s3_prep$mean_rt, format='f', digits=1), '±', formatC(table_s3_prep$sd_rt, format='f', digits=1), ' (N=', table_s3_prep$n_rt, ')', sep='')
-table_s3_prep$lh = paste(formatC(table_s3_prep$mean_lh, format='f', digits=1), ' (N=', table_s3_prep$n_samp_lh, ')', sep='')
-table_s3_prep$cv = paste(percent(table_s3_prep$mean_cv), ' (N=', table_s3_prep$n_samp, ')', sep='')
+table_s5_prep$retention_time = paste(formatC(table_s5_prep$mean_rt, format='f', digits=1), '±', formatC(table_s5_prep$sd_rt, format='f', digits=1), ' (N=', table_s5_prep$n_rt, ')', sep='')
+table_s5_prep$lh = paste(formatC(table_s5_prep$mean_lh, format='f', digits=1), ' (N=', table_s5_prep$n_samp_lh, ')', sep='')
+table_s5_prep$cv = paste(percent(table_s5_prep$mean_cv), ' (N=', table_s5_prep$n_samp, ')', sep='')
 
-table_s3 = table_s3_prep[,c('allorder','peptide','ion','retention_time','lh','cv')]
-table_s3
+table_s5 = table_s5_prep[,c('allorder','peptide','ion','retention_time','lh','cv')]
+table_s5
 
-write.table(table_s3, 'display_items/script_generated/table-s3.tsv',sep='\t',col.names=T,row.names=F,quote=F)
+write.table(table_s5, 'display_items/script_generated/table-s5.tsv',sep='\t',col.names=T,row.names=F,quote=F)
 
 # stats for table S1 legend
 length(unique(paste(selectivity_data$run, selectivity_data$label)))
@@ -292,17 +292,12 @@ masspervol = molarity * approx_mw # g/L
 ngml = masspervol * (1e9) / (1e3) # convert g/L to ng/ML
 
 
-# Figure S5. Partial analytical validation of the PrP MRM assay.
-# A: Selectivity by species
-# B: Selectivity data collapsed by peptide
-# C: Linearity of 15N recombinant spike
-# D: Linearity of hi- into low human CSF sample
-# E: Dilution linearity of mouse peptides in brain homogenate
-
-
-imgsave(paste('display_items/script_generated/figure-s05.',imgmode,sep=''),width=6.5*resx,height=9*resx,res=resx)
-
-layout_matrix = matrix(c(1,3,1,4,2,5),nrow=3,byrow=T)
+# Figure 5. Application of the PrP MRM assay for preclinical species of interest
+# A: grid of expected peptide results based on sequence match
+# B (was S5B): Selectivity data collapsed by peptide
+# C (was S5E): Dilution linearity of mouse peptides in brain homogenate
+imgsave(paste('display_items/script_generated/figure-5.',imgmode,sep=''),width=6.5*resx,height=3*resx,res=resx)
+layout_matrix = matrix(c(1,1,1,2,2,3,3),nrow=1,byrow=T)
 layout(layout_matrix)
 
 y_axis_data = sqldf("
@@ -313,103 +308,258 @@ y_axis_data = sqldf("
                     ;")
 y_axis_data$color = selectivity_legend$col[match(y_axis_data$expectedness,selectivity_legend$label)]
 selectivity_data$color = selectivity_legend$col[match(selectivity_data$expectedness,selectivity_legend$label)]
-
 ylims = c(min(y_axis_data$y)-.5, max(y_axis_data$y)+.5) # for one species: c(min(peptides$allorder)-.5, max(peptides$allorder)+.5)
-xlims = c(floor(min(log10(selectivity_data$lh))), ceiling(max(log10(selectivity_data$lh))))
-xats = min(xlims):max(xlims)
+selectivity_data$y_collapsed = -peptides$allorder[match(selectivity_data$peptide,peptides$peptide)]
+collapsed_ylims=c(-9.5,-.5)
 
-par(mar=c(6,13,4,1))
-plot(NA,NA,xlim=xlims,ylim=ylims,ann=FALSE,axes=FALSE,xaxs='i',yaxs='i')
-axis(side=1,at=xats)
-mtext(side=1, line=2.5, text='log10(L:H ratio)')
-mtext(side=2,at=y_axis_data$y,text=y_axis_data$peptide,col=y_axis_data$color,font=2,las=2, cex=0.8)
-mtext(side=2,line=10,at=(selectivity_tranches$tranche-.5)*tranche_size, text=selectivity_tranches$species, font=2, cex=1.2)
-points(x=log10(selectivity_data$lh), y=selectivity_data$y, col=selectivity_data$color, pch=20)
+par(mar=c(5,10,5,2))
+xlims = c(0.5,3.0)
+species = c('human','cynomolgus','mouse','rat') # colnames(peptides)[4:7]
+colnames(peptides)[4:7] = species
+species_x = c(1,1.5,2,2.5)
+plot(NA,NA,xlim=xlims,ylim=collapsed_ylims,ann=FALSE,axes=FALSE,xaxs='i',yaxs='i')
+mtext(side=2,at=-peptides$allorder,text=peptides$peptide,col=peptides$color,font=1,las=2,cex=0.8)
+species_matrix = as.matrix(peptides[,species] == 'yes')
+mtext(side=1, line=0.5, text='sequence expected')
 par(xpd=T)
-legend(x=floor(min(log10(selectivity_data$lh)))+1.5,y=max(ylims)+3.5,legend=selectivity_legend$label,col=selectivity_legend$col,text.col=selectivity_legend$col,pch=20)
+points(x=c(1,2), y=rep(min(collapsed_ylims),2)-1.5, pch=c(15,4), lwd=c(NA,2), col=selectivity_legend$col, cex=1.1)
+text(x=c(1,2), y=rep(min(collapsed_ylims),2)-1.5, pos=4, col=selectivity_legend$col, labels=c('yes','no'), cex=1.1)
+text(x=species_x, y=rep(max(collapsed_ylims),4)+0.5, labels=species, adj=c(0,0), srt=45)
 par(xpd=F)
-
-# failed attempt2 to plot species silhouettes as rasters - would have been cool
-# human = as.raster(raster('images/human-cc0.png'))
-# dim(human)
-# par(xpd=T)
-# rasterImage(human, xleft=-6,xright=-5,ybottom=-10,ytop=-1,interpolate=F)
-# rasterImage(human, col='#000000', xleft=-6,xright=-5,ybottom=-10,ytop=-1,interpolate=F)
-# rasterImage(human, col=gray.colors(2, start=0, end=1), xleft=-6,xright=-5,ybottom=-10,ytop=-1,interpolate=F)
-# par(xpd=F)
-# # human = raster('images/human-cc0.png')
-# # par(fig=c(0.01,0.10,0.01,0.10), mar=c(0,0,0,0))
-# # image(human, add=T)
-# # #plot(human, asp=1, add=T)
-# # #plot(NA, NA, xlim=c(0,dim(fig1b)[1]), ylim=c(0,dim(fig1b)[2]), ann=FALSE, axes=FALSE)
-# # #plot(fig1b, asp=1, add=T)
-# # #rasterImage(fig1b,0,0,dim(fig1b)[1],dim(fig1b),interpolate=F)
-# # plot(human, col=gray.colors(n=256,start=0,end=1), useRaster=F, axes=FALSE, ann=FALSE, add=T)
-# plot(NA, NA, xlim=c(0,1), ylim=c(0,1))
-# par(fig=c(.75,1,.75,1))
-# par(new=T, mar=c(0,0,0,0))
-# image(human, )
-# plot(human, col=gray.colors(n=256,start=0,end=1), useRaster=F, axes=FALSE, ann=FALSE, add=T)
-
+for (row in 1:nrow(species_matrix)) {
+  for (col in 1:ncol(species_matrix)) {
+    if (species_matrix[row,col]) {
+      points(species_x[col], -row, pch=15, col=selectivity_legend$col[selectivity_legend$label=='sequence-matched'])
+    } else {
+      points(species_x[col], -row, pch=4, lwd=2, col=selectivity_legend$col[selectivity_legend$label=='not matched'])
+    }
+  }
+}
 mtext('A', side=3, cex=2, adj = -0.9, line = 0.3)
 
-collapsed_ylims=c(-9.5,-.5)
-selectivity_data$y_collapsed = -peptides$allorder[match(selectivity_data$peptide,peptides$peptide)]
-
-par(mar=c(6,13,4,1))
+par(mar=c(5,1,5,2))
+xlims = c(floor(min(log10(selectivity_data$lh))), ceiling(max(log10(selectivity_data$lh))))
+xats = min(xlims):max(xlims)
 plot(NA,NA,xlim=xlims,ylim=collapsed_ylims,ann=FALSE,axes=FALSE,xaxs='i',yaxs='i')
+abline(v=xats, lwd=0.25)
 axis(side=1,at=xats)
-mtext(side=1, line=2.5, text='log10(L:H ratio)')
-mtext(side=2,at=-peptides$allorder,text=peptides$peptide,font=2,las=2,cex=0.8)
+mtext(side=1, line=2.5, text='observed abundance')
+mtext(side=1, line=3.5, text='log10(L:H)', cex=0.8)
 points(x=log10(selectivity_data$lh), y=selectivity_data$y_collapsed, col=selectivity_data$color, pch=20)
-mtext('B', side=3, cex=2, adj = -0.9, line = 0.3)
+mtext('B', side=3, cex=2, adj = -0.2, line = 0.3)
 
+mocurve = subset(mrm_data, run == 9)
+mocurve$fracwt = as.numeric(gsub('x.*','',mocurve$description))
+cv_step1 = sqldf("
+                 select   peptide, fracwt, avg(lh) mean_lh, stdev(lh) sd_lh
+                 from     mocurve
+                 where    fracwt > 0
+                 group by 1, 2
+                 order by 1, 2
+                 ;")
+cv_step2 = sqldf("
+                 select   c.peptide, avg(c.sd_lh / c.mean_lh) mean_cv
+                 from     cv_step1 c, peptides p
+                 where    c.peptide = p.peptide
+                 and      p.mouse = 'yes'
+                 group by 1
+                 order by 1
+                 ;")
+cv_step2
+#         peptide    mean_cv
+# 1     ESQAYYDGR 0.08301260
+# 2    GENFTETDVK 0.14291497
+# 3 RPKPGGWNTGGSR 0.37349903
+# 4  VVEQMCVTQYQK 0.06612986
+# 5   YPGQGSPGGNR 0.07887789
+best_mo_peptides = subset(cv_step2, mean_cv < .10)
+best_mo_peptides$col = peptides$color[match(best_mo_peptides$peptide,peptides$peptide)]
+mocurve = subset(mocurve, peptide %in% best_mo_peptides$peptide)
+mocurve$col = best_mo_peptides$col[match(mocurve$peptide, best_mo_peptides$peptide)]
 
-expt15 = subset(mrm_data, run == 15 & peptide %in% peptides$peptide[peptides$human=='yes'])
-eparms = data.frame(label=LETTERS[1:12],spike=rep(c(0,2.4,24,240),each=3),x=rep(0:3,each=3))
-expt15$spike = eparms$spike[match(expt15$label, eparms$label)]
-expt15$x = eparms$x[match(expt15$label, eparms$label)]
-expt15$pep_col = peptides$color[match(expt15$peptide, peptides$peptide)]
-xlabs = sqldf("select x, spike from eparms group by 1, 2 order by 1, 2;")
-xbreak = 0.5
-xlims = c(-0.5, 3.5)
+mo_rel = sqldf("
+               select   mall.peptide, mall.col, mall.fracwt, mall.lh, m100.mean_lh, mall.lh / m100.mean_lh rel
+               from     mocurve mall, (select peptide, avg(lh) mean_lh from mocurve where fracwt == 1 group by 1 order by 1) m100
+               where    mall.peptide = m100.peptide
+               order by 1
+               ;")
 
-par(mar=c(4,4,4,2))
-ylims = c(-5,1.2)
-plot(NA, NA, xlim=xlims, ylim=ylims, ann=FALSE, axes=FALSE, xaxs='i', yaxs='i')
-axis(side=1, at=xlims, labels=NA, lwd=1, lwd.ticks=0)
-axis(side=1, at=xlabs$x, labels=xlabs$spike, lwd=0, lwd.ticks=1)
-axis.break(axis=1, breakpos=xbreak, style = 'zigzag')
-mtext(side=1, line=2.5, text='15N HuPrP spike concentration (ng/mL)')
-axis(side=2, at=-5:2, labels=formatC(10^(-5:2), format='fg', big.mark=','), lwd=1, lwd.ticks=1, las=2)
-mtext(side=2, line=3, text='15N:H ratio')
-set.seed(1) # for jitter
-points(jitter(expt15$x,amount=.05), log10(expt15$nh), pch=20, col=expt15$pep_col)
-
-spikes = peptides[peptides$human=='yes',c('ncorder','peptide','color')]
-spikes$intercept = 0
-spikes$slope = 0
-spikes$adjr2 = 0
-for (i in 1:nrow(spikes)) {
-  subs = subset(expt15, peptide==spikes$peptide[i])
-  m = lm(log10(nh) ~ x, data=subset(subs, spike > 0))
-  spikes$intercept[i] = coefficients(m)["(Intercept)"]
-  spikes$slope[i] = coefficients(m)["x"]
-  spikes$adjr2[i] = summary(m)$adj.r.squared
+best_mo_peptides$intercept = 0
+best_mo_peptides$slope = 0
+best_mo_peptides$adjr2 = 0
+for (i in 1:nrow(best_mo_peptides)) {
+  m = lm(rel ~ fracwt, data=subset(mo_rel, peptide==best_mo_peptides$peptide[i]))
+  best_mo_peptides$intercept[i] = coefficients(m)["(Intercept)"]
+  best_mo_peptides$slope[i] = coefficients(m)["fracwt"]
+  best_mo_peptides$adjr2[i] = summary(m)$adj.r.squared
 }
-percent(range(spikes$adjr2),digits=3)
+percent(range(best_mo_peptides$adjr2),digits=3)
 
-for(currpeptide in peptides$peptide[peptides$human=='yes']) {
-  subs = subset(expt15, peptide==currpeptide)
-  m = lm(log10(nh) ~ x, data=subset(subs, spike > 0))
-  #m = lm(nh ~ spike, data=subs)
-  summary(m)
-  abline(a=m$coefficients['(Intercept)'], b=m$coefficients['x'], col=peptides$color[peptides$peptide==currpeptide])
+par(mar=c(5,3,5,3))
+plot(NA, NA, xlim=c(-0.05,1.05), ylim=c(0,1.1), xaxs='i', yaxs='i', ann=FALSE, axes=FALSE)
+axis(side=1, at=unique(mo_rel$fracwt), labels=NA, lwd=1, lwd.ticks=1, tck=-0.02)
+axis(side=1, at=c(0,.5,1), labels=c('100%\nKO','50/50\nmix','100%\nWT'), lwd=0, lwd.ticks=1, tck=-0.05, cex.axis=0.8)
+axis(side=2, at=(0:4)/4, labels=percent((0:4)/4), lwd=1, lwd.ticks=1, las=2)
+mtext(side=1, line=2.5, text='BH mixture proportion')
+mtext(side=2, line=3, text='normalized L:H ratio')
+set.seed(1)
+points(jitter(mo_rel$fracwt,amount=0.025), mo_rel$rel, col=mo_rel$col, pch=20)
+for (i in 1:nrow(best_mo_peptides)) {
+  abline(a=best_mo_peptides$intercept[i], b=best_mo_peptides$slope[i], lwd=1, col=best_mo_peptides$col[i])
 }
-par(xpd=T)
-legend(x=min(xlims), y=max(ylims)+1, peptides$peptide[peptides$human=='yes'],col=peptides$color[peptides$human=='yes'],text.font=2,text.col=peptides$color[peptides$human=='yes'],pch=20,lwd=1)
-par(xpd=F)
+legend('topleft', best_mo_peptides$peptide, pch=20, lwd=1, col=best_mo_peptides$col, text.col=best_mo_peptides$col, text.font=1, cex=0.65, bty='n')
 mtext('C', side=3, cex=2, adj = -0.2, line = 0.3)
+
+dev.off()
+
+
+
+
+
+
+# Figure S5. QC & partial analytical validation of the PrP MRM assay.
+# A-C (was S7A, B, E) : peptide abundance by day
+# D (was S10A): Correlation of peptides with one another
+# E (was S5D): Linearity of hi- into low human CSF sample
+
+imgsave(paste('display_items/script_generated/figure-s05.',imgmode,sep=''),width=6.5*resx,height=6.5*resx,res=resx)
+
+layout_matrix = matrix(c(1,1,2,2,3,3,4,4,4,4,4,4,5,5,5,6,6,6),nrow=3,byrow=T)
+layout(layout_matrix, heights=c(1,.5,1))
+
+# this figure requires access to raw Skyline data
+# load all MRM data into one table
+runs = read.table('data/meta/runs.tsv',sep='\t',header=T,quote='',comment.char='')
+if (exists('mrm_raw')) {
+  rm(mrm_raw)
+}
+for (batch in 1:5) {
+  rowno = which(runs$expt_no == batch + 15)
+  rawdat = read.table(paste('data/skyline/',runs$datafile[rowno],sep=''), sep=',',header=T,quote='',comment.char='')
+  rawdat$batch = batch
+  if (exists('mrm_raw')) {
+    mrm_raw = rbind(mrm_raw, rawdat)
+  } else {
+    mrm_raw = rawdat
+  }
+}
+colnames(mrm_raw) = gsub('[^a-z0-9_]','_',tolower(colnames(mrm_raw)))
+mrm_raw = subset(mrm_raw, peptide_sequence %in% peptides$peptide[peptides$human=='yes'])
+
+colnames(mrm_raw)
+mrm_raw$light_area = as.numeric(mrm_raw$light_area)
+mrm_raw$x15n_area = as.numeric(mrm_raw$x15n_area)
+mrm_raw$heavy_area = as.numeric(mrm_raw$heavy_area)
+
+pep_batch_totals = sqldf("
+                         select   batch,
+                         peptide_sequence,
+                         peptide_modified_sequence,
+                         sum(light_area) l,
+                         sum(x15n_area) n15,
+                         sum(heavy_area) h,
+                         sum(x15n_area/heavy_area) nh,
+                         sum(light_area/x15n_area) ln,
+                         sum(light_area/heavy_area) lh
+                         from     mrm_raw
+                         group by 1, 2, 3
+                         order by 1, 2, 3
+                         ;")
+
+batch_totals = sqldf("
+                     select   batch,
+                     sum(light_area) l,
+                     sum(x15n_area) n15,
+                     sum(heavy_area) h,
+                     sum(x15n_area/heavy_area) nh,
+                     sum(light_area/x15n_area) ln,
+                     sum(light_area/heavy_area) lh
+                     from     mrm_raw
+                     group by 1
+                     order by 1
+                     ;")
+
+pep_batch = sqldf("
+                  select   b.batch, p.ncorder,p.peptide, pb.peptide_modified_sequence, p.color,
+                  pb.l/b.l lx,
+                  pb.n15/b.n15 nx,
+                  pb.h/b.h hx,
+                  pb.nh/b.nh nhx,
+                  pb.ln/b.ln lnx,
+                  pb.lh/b.lh lhx
+                  from     peptides p, pep_batch_totals pb, batch_totals b
+                  where    p.peptide = pb.peptide_sequence
+                  and      pb.batch = b.batch
+                  order by 1, 2
+                  ;")
+
+plot_params = sqldf("
+                    select   m.peptide_modified_sequence, p.peptide, p.ncorder, p.color
+                    from     mrm_raw m, peptides p
+                    where    m.peptide_sequence = p.peptide
+                    group by 1, 2
+                    order by 3
+                    ;")
+plot_params$order_w_metox  = 1:7
+plot_params$angle = NA
+plot_params$density = NA
+plot_params$angle[plot_params$peptide_modified_sequence=='VVEQM[+16]C[+57]ITQYER'] = 45
+plot_params$density[plot_params$peptide_modified_sequence=='VVEQM[+16]C[+57]ITQYER'] = 40
+
+
+multiplot_params = data.frame(var=c('lx','nx','lnx'),
+                              disp=c('light','15N','light:15N'))
+par(mar=c(4,5,4,2))
+for (i in 1:nrow(multiplot_params)) {
+  var = multiplot_params$var[i]
+  x = dcast(pep_batch, formula = peptide_modified_sequence ~ batch, value.var=var)
+  x$order_w_metox = plot_params$order_w_metox[match(x$peptide_modified_sequence, plot_params$peptide_modified_sequence)]
+  x = x[order(x$order_w_metox),]
+  mat = as.matrix(x[,as.character(1:5)])
+  barplot(mat, col=plot_params$color, density=plot_params$density, angle=plot_params$angle, yaxt='n', border=NA)
+  axis(side=2, at=(0:4)/4, labels=percent((0:4)/4), lwd=1, lwd.ticks=1, las=2)
+  mtext(side=1, line=2.5, text='day number')
+  mtext(side=2, line=3.0, text='% of total')
+  mtext(side=3, line=1, text=multiplot_params$disp[i])
+  mtext(LETTERS[i], side=3, cex=2, adj = 0,0, line = 1.5)
+}
+
+# wide empty plot to hold master legend
+par(mar=c(1,2,1,2))
+plot(NA, NA, xlim=c(0,1), ylim=c(0,1), xaxs='i', yaxs='i', axes=F, ann=F)
+legend(x=0.0, y=1, cex=1.6, legend=plot_params$peptide_modified_sequence[1:4], fill=plot_params$color[1:4], text.col=plot_params$color[1:4], text.font=2, density=plot_params$density[1:4], angle=plot_params$angle[1:4], bty='n')
+legend(x=0.4, y=1, cex=1.6, legend=plot_params$peptide_modified_sequence[5:7], fill=plot_params$color[5:7], text.col=plot_params$color[5:7], text.font=2, density=plot_params$density[5:7], angle=plot_params$angle[5:7], bty='n')
+
+
+scatter_data = sqldf("
+                     select   refpep.peptide refpeptide,
+                     other.peptide otherpeptide,
+                     other.color_pep color,
+                     refpep.ln_mean refln,
+                     refpep.lh_mean reflh,
+                     other.ln_mean othln,
+                     other.lh_mean othlh
+                     from     clin refpep, clin other
+                     where    refpep.indiv_id = other.indiv_id
+                     and      refpep.peptide = 'VVEQMCITQYER'
+                     and      other.peptide != 'VVEQMCITQYER'
+                     ;")
+
+lims = c(0,55)
+xats = 0:60
+xbigs = (0:6)*10
+par(mar=c(4,4,4,2))
+plot(NA, NA, xlim=lims, ylim=lims, xaxs='i', yaxs='i', ann=F, axes=F)
+axis(side=1, at=xats, labels=NA, lwd=1, lwd.ticks=1, tck=-0.025)
+axis(side=1, at=xbigs, labels=xbigs, lwd=0, lwd.ticks=1, tck=-0.050)
+axis(side=2, at=xats, labels=NA, lwd=1, lwd.ticks=1, tck=-0.025, las=2)
+axis(side=2, at=xbigs, labels=xbigs, lwd=0, lwd.ticks=1, tck=-0.050, las=2)
+mtext(side=1, line=2.0, text='reference peptide L:15N ratio')
+mtext(side=2, line=2.0, text='other peptide L:15N ratio')
+mtext(side=3, line=0, text='L:15N')
+points(x=scatter_data$refln, y=scatter_data$othln, col=scatter_data$color, pch=20, cex=0.75)
+legend('topleft', legend=hupeps$peptide[c(1,2,3,4,6)], pch=20, col=hupeps$color[c(1,2,3,4,6)], text.col=hupeps$color[c(1,2,3,4,6)], text.font=2, bty='n', cex=0.8)
+mtext('D', side=3, cex=2, adj = 0,0, line = 1.5)
 
 
 expt11 = subset(mrm_data, run==11 & peptide %in% peptides$peptide[peptides$human=='yes'])
@@ -418,11 +568,11 @@ hilo$proportion_a = as.numeric(gsub('-[12]','',gsub('A','',hilo$label)))/100
 hilo$col = peptides$color[match(hilo$peptide, peptides$peptide)]
 
 hilo_rel = sqldf("
-select   hall.peptide, hall.proportion_a, hall.lh, h100.mean_lh, hall.lh / h100.mean_lh rel
-from     hilo hall, (select peptide, avg(lh) mean_lh from hilo where proportion_a == 1 group by 1 order by 1) h100
-where    hall.peptide = h100.peptide
-order by 1
-;")
+                 select   hall.peptide, hall.proportion_a, hall.lh, h100.mean_lh, hall.lh / h100.mean_lh rel
+                 from     hilo hall, (select peptide, avg(lh) mean_lh from hilo where proportion_a == 1 group by 1 order by 1) h100
+                 where    hall.peptide = h100.peptide
+                 order by 1
+                 ;")
 
 hilo_peptides = peptides[peptides$human=='yes',c('ncorder','peptide','color')]
 hilo_peptides$intercept = 0
@@ -448,79 +598,8 @@ for (i in 1:nrow(hilo_peptides)) {
   abline(a=hilo_peptides$intercept[i], b=hilo_peptides$slope[i], lwd=1, col=hilo_peptides$color[i])
 }
 par(xpd=T)
-legend(x=-0.05, y=1.1, peptides$peptide[peptides$human=='yes'],col=peptides$color[peptides$human=='yes'],text.font=2,text.col=peptides$color[peptides$human=='yes'],pch=20,lwd=1)
+legend(x=-0.05, y=1.1, peptides$peptide[peptides$human=='yes'],col=peptides$color[peptides$human=='yes'],text.font=2,text.col=peptides$color[peptides$human=='yes'],pch=20,lwd=1,cex=0.8,bty='n')
 par(xpd=F)
-mtext('D', side=3, cex=2, adj = -0.2, line = 0.3)
-
-
-mocurve = subset(mrm_data, run == 9)
-mocurve$fracwt = as.numeric(gsub('x.*','',mocurve$description))
-
-cv_step1 = sqldf("
-                 select   peptide, fracwt, avg(lh) mean_lh, stdev(lh) sd_lh
-                 from     mocurve
-                 where    fracwt > 0
-                 group by 1, 2
-                 order by 1, 2
-                 ;")
-cv_step2 = sqldf("
-                 select   c.peptide, avg(c.sd_lh / c.mean_lh) mean_cv
-                 from     cv_step1 c, peptides p
-                 where    c.peptide = p.peptide
-                 and      p.mouse = 'yes'
-                 group by 1
-                 order by 1
-                 ;")
-cv_step2
-
-#         peptide    mean_cv
-# 1     ESQAYYDGR 0.08301260
-# 2    GENFTETDVK 0.14291497
-# 3 RPKPGGWNTGGSR 0.37349903
-# 4  VVEQMCVTQYQK 0.06612986
-# 5   YPGQGSPGGNR 0.07887789
-
-
-best_mo_peptides = subset(cv_step2, mean_cv < .10)
-
-
-best_mo_peptides$col = peptides$color[match(best_mo_peptides$peptide,peptides$peptide)]
-
-mocurve = subset(mocurve, peptide %in% best_mo_peptides$peptide)
-mocurve$col = best_mo_peptides$col[match(mocurve$peptide, best_mo_peptides$peptide)]
-
-
-mo_rel = sqldf("
-                 select   mall.peptide, mall.col, mall.fracwt, mall.lh, m100.mean_lh, mall.lh / m100.mean_lh rel
-                 from     mocurve mall, (select peptide, avg(lh) mean_lh from mocurve where fracwt == 1 group by 1 order by 1) m100
-                 where    mall.peptide = m100.peptide
-                 order by 1
-                 ;")
-
-best_mo_peptides$intercept = 0
-best_mo_peptides$slope = 0
-best_mo_peptides$adjr2 = 0
-for (i in 1:nrow(best_mo_peptides)) {
-  m = lm(rel ~ fracwt, data=subset(mo_rel, peptide==best_mo_peptides$peptide[i]))
-  best_mo_peptides$intercept[i] = coefficients(m)["(Intercept)"]
-  best_mo_peptides$slope[i] = coefficients(m)["fracwt"]
-  best_mo_peptides$adjr2[i] = summary(m)$adj.r.squared
-}
-percent(range(best_mo_peptides$adjr2),digits=3)
-
-par(mar=c(4,4,4,2))
-plot(NA, NA, xlim=c(-0.05,1.05), ylim=c(0,1.1), xaxs='i', yaxs='i', ann=FALSE, axes=FALSE)
-axis(side=1, at=unique(mo_rel$fracwt), labels=NA, lwd=1, lwd.ticks=1, tck=-0.02)
-axis(side=1, at=c(0,.5,1), labels=c('100% KO','50/50 mix','100% WT'), lwd=0, lwd.ticks=1, tck=-0.05)
-axis(side=2, at=(0:4)/4, labels=percent((0:4)/4), lwd=1, lwd.ticks=1, las=2)
-mtext(side=1, line=2.5, text='mixture proportion of 0.5% BH')
-mtext(side=2, line=3, text='normalized L:H ratio')
-set.seed(1)
-points(jitter(mo_rel$fracwt,amount=0.025), mo_rel$rel, col=mo_rel$col, pch=20)
-for (i in 1:nrow(best_mo_peptides)) {
-  abline(a=best_mo_peptides$intercept[i], b=best_mo_peptides$slope[i], lwd=1, col=best_mo_peptides$col[i])
-}
-legend('topleft', best_mo_peptides$peptide, pch=20, lwd=1, col=best_mo_peptides$col, text.col=best_mo_peptides$col, text.font=2)
 mtext('E', side=3, cex=2, adj = -0.2, line = 0.3)
 
 
@@ -636,82 +715,6 @@ dev.off()
 
 
 
-
-imgsave(paste('display_items/script_generated/figure-s06.',imgmode,sep=''),width=6.5*resx,height=6*resx,res=resx)
-
-layout_matrix = as.matrix(c(1,2,3),nrow=3,byrow=T)
-layout(layout_matrix)
-
-par(mar=c(2,4,3,1))
-
-
-paneladj = 0.0
-
-ylims = c(3e4,1e7)
-xlims = c(0.5, 6.5)
-
-plot(NA, NA, xlim=xlims, ylim=ylims, log='y', axes=F, ann=F, xaxs='i', yaxs='i')
-axis(side=1, at=xlims, labels=NA, lwd.ticks=0)
-axis(side=2, at=xats, labels=NA, lwd=1, lwd.ticks=1, tck=-0.025)
-axis(side=2, at=xbigs, labels=xbigs_labs, lwd=0, lwd.ticks=1, tck=-0.05, las=2)
-mtext(side=2, line=2.5, text='peak area')
-for (indiv in unique(clin$indiv_id)) {
-  subs = subset(clin, indiv_id==indiv)
-  subs = subs[with(subs, order(ncorder)),]
-  points(subs$ncorder, subs$heavy, type='l', lwd=0.25, col='#CCCCCC')
-  points(subs$ncorder, subs$heavy, pch=20, col=subs$color_pep)
-}
-mtext(side=3, line=0, text='heavy', cex=1, font=1)
-mtext('A', side=3, cex=2, adj = paneladj, line = 0.5)
-
-
-
-ylims = c(0.01, 30)
-r_ats = rep(1:9,10) * 10^(rep(-3:6,each=9))
-r_bigs = 10^(-3:6)
-r_bigs_labs = formatC(r_bigs, digits=0, format='fg', big.mark=',')
-plot(NA, NA, xlim=xlims, ylim=ylims, log='y', axes=F, ann=F, xaxs='i', yaxs='i')
-axis(side=1, at=xlims, labels=NA, lwd.ticks=0)
-axis(side=2, at=r_ats, labels=NA, lwd=1, lwd.ticks=1, tck=-0.025)
-axis(side=2, at=r_bigs, labels=r_bigs_labs, lwd=0, lwd.ticks=1, tck=-0.05, las=2)
-mtext(side=2, line=2, text='peak area ratio')
-for (indiv in unique(clin$indiv_id)) {
-  subs = subset(clin, indiv_id==indiv)
-  subs = subs[with(subs, order(ncorder)),]
-  points(subs$ncorder, subs$lh_mean, type='l', lwd=0.25, col='#CCCCCC')
-  points(subs$ncorder, subs$lh_mean, pch=20, col=subs$color_pep)
-}
-mtext(side=3, line=0, text='light:heavy', cex=1, font=1)
-mtext('B', side=3, cex=2, adj = paneladj, line = 0.5)
-
-
-# empty panel for bottom legend material
-par(mar=c(2,4,0,1))
-plot(NA, NA, xlim=xlims, ylim=c(0,1), axes=F, ann=F, xaxs='i')
-par(xpd=T)
-mtext(side=3, line=0.5, at=hupeps$ncorder, text=hupeps$peptide, col=hupeps$color, font=2, cex=0.6)
-par(xpd=F)
-# arrows to indicate N vs. C terminal
-nctermcol = '#5C5C5C'
-par(xpd=T)
-yarr = 0.95
-xprop = .15
-arrows(x0=min(xlims), x1=min(xlims) + xprop*max(xlims), y0=yarr, code=1, length=0.1, angle=30, lwd=2, col=nctermcol)
-text(x=min(xlims) + xprop*max(xlims), y=yarr, pos=4, labels='N terminus', col=nctermcol, font=2)
-arrows(x0=max(xlims), x1=max(xlims) + min(xlims) - xprop*max(xlims), y0=yarr, code=1, length=0.1, angle=30, lwd=2, col=nctermcol)
-text(x=max(xlims) + min(xlims) - xprop*max(xlims), y=yarr, pos=2, labels='C terminus', col=nctermcol, font=2)
-par(xpd=F)
-
-dev.off()
-
-
-
-
-
-
-
-
-
 # Table 1. Quantification of peptides in human CSF
 # Rows: 6 human peptides (asterisk on VVEQ count met-ox replicates)
 # Cols: H, N, L, L:N, implied mean ng/mL, intra-run CV (all samples), inter-run CV (IPC)
@@ -801,6 +804,15 @@ write.table(table_s4_joined, 'display_items/script_generated/table-s4.tsv', sep=
 
 
 # calculate response factors and perform normalization
+expt15 = subset(mrm_data, run == 15 & peptide %in% peptides$peptide[peptides$human=='yes'])
+eparms = data.frame(label=LETTERS[1:12],spike=rep(c(0,2.4,24,240),each=3),x=rep(0:3,each=3))
+expt15$spike = eparms$spike[match(expt15$label, eparms$label)]
+expt15$x = eparms$x[match(expt15$label, eparms$label)]
+expt15$pep_col = peptides$color[match(expt15$peptide, peptides$peptide)]
+xlabs = sqldf("select x, spike from eparms group by 1, 2 order by 1, 2;")
+xbreak = 0.5
+xlims = c(-0.5, 3.5)
+
 expt15$nl = 1/expt15$ln # 15N:L ratio is reciprocal of the L:15N ratio
 true_n = 24.2 # true 15N spike concentration in clinical samples = 24.2 ng/mL
 for (i in 1:nrow(hupeps)) { # for each peptide
@@ -825,7 +837,7 @@ clin$norm_ngml = clin$ln_mean * clin$rf * true_n # calculate the normalized ng/m
 # if you model based on L:15N ratio, you can't specify this condition.
 
 
-table_s5_prep = sqldf("
+table_s3_prep = sqldf("
 select   h.peptide, 
          cast(round(avg(light)/1000000,2) as text)||'±'||cast(round(stdev(light)/1000000,2) as text) meansd_light,
          cast(round(avg(n15)/1000000,2) as text)||'±'||cast(round(stdev(n15)/1000000,2) as text) meansd_n15,
@@ -840,22 +852,22 @@ order by h.ncorder
 ;")
 
 # average normalized PrP concentration across all peptides
-mean(table_s5_prep$norm_ngml)
+mean(table_s3_prep$norm_ngml)
 
-table_s5_disp = table_s5_prep
-table_s5_disp$raw_ngml = round(table_s5_disp$raw_ngml, 0)
-table_s5_disp$respfact = round(table_s5_disp$respfact, 1)
-table_s5_disp$norm_ngml = round(table_s5_disp$norm_ngml, 0)
+table_s3_disp = table_s3_prep
+table_s3_disp$raw_ngml = round(table_s3_disp$raw_ngml, 0)
+table_s3_disp$respfact = round(table_s3_disp$respfact, 1)
+table_s3_disp$norm_ngml = round(table_s3_disp$norm_ngml, 0)
 
-table_s5_disp
+table_s3_disp
 
-write.table(table_s5_disp, 'display_items/script_generated/table-s5.tsv',sep='\t',col.names=T,row.names=F,quote=F)
-
-
+write.table(table_s3_disp, 'display_items/script_generated/table-s3.tsv',sep='\t',col.names=T,row.names=F,quote=F)
 
 
-#### Begin Figure S8 - depiction of normalization scheme
-imgsave(paste('display_items/script_generated/figure-s08.',imgmode,sep=''),width=6.5*resx,height=6.5*resx,res=resx)
+
+
+#### Begin Figure S6 - depiction of normalization scheme
+imgsave(paste('display_items/script_generated/figure-s06.',imgmode,sep=''),width=6.5*resx,height=6.5*resx,res=resx)
 
 layout_matrix = matrix(c(1,2,3,4),nrow=2,byrow=T)
 layout(layout_matrix)
@@ -881,18 +893,6 @@ mtext(side=3, line=0, text='raw response curves', cex=1, font=1)
 mtext('A', side=3, cex=2, adj = paneladj, line = 0.5)
 
 
-# what panel A would look like in linear space:
-# plot(NA, NA, xlim=c(0,6.6), ylim=c(0,250), ann=FALSE, axes=FALSE, xaxs='i', yaxs='i')
-# axis(side=1)
-# axis(side=2)
-# mtext(side=2, line=2.5, text=expression(''^'15'*'N spike concentration'))
-# mtext(side=1, line=2.5, text=expression(''^'15'*'N:light peak area ratio'))
-# for (i in 1:nrow(hupeps)) {
-#   points(x=r_ats, y=r_ats*hupeps$slope[i], type='l', col=hupeps$color[i])
-# }
-# points(expt15$nl, jitter(expt15$spike,0.2), pch=20, col=expt15$pep_col)
-
-
 expt15$rf = hupeps$rf[match(expt15$peptide, hupeps$peptide)]
 plot(NA, NA, xlim=ratio_lims, ylim=spike_lims, log='x', ann=FALSE, axes=FALSE, xaxs='i', yaxs='i')
 axis(side=1, at=r_ats, labels=NA, lwd=1, lwd.ticks=1, tck=-0.025)
@@ -906,8 +906,6 @@ for (i in 1:nrow(hupeps)) {
 points(expt15$nl/expt15$rf, jitter(log10(expt15$spike),0.2), pch=20, col=expt15$pep_col)
 mtext(side=3, line=0, text='normalized response curves', cex=1, font=1)
 mtext('B', side=3, cex=2, adj = paneladj, line = 0.5)
-
-
 
 par(mar=c(7,5,3,1))
 
@@ -947,13 +945,13 @@ mtext(side=1, line=0.5, at=hupeps$ncorder, text=hupeps$peptide, font=2, las=2, c
 mtext('D', side=3, cex=2, adj = paneladj, line = 0.5)
 
 
-dev.off() #### End Figure S8
+dev.off() #### End Figure S6
 
 
 
 
 
-### Begin Table S6 - CV and L:15N by quartile
+### Begin Table S4 - CV and L:15N by quartile
 
 # Darn, the R sqldf implementation of sqlite does not support rank/partition!
 # sqldf("
@@ -980,90 +978,39 @@ for (currpeptide in peptides$peptide[peptides$human=='yes']) {
 clin$percentile = (clin$ln_rank-1)/(nrow(clin)/6)
 clin$quartile = floor(clin$percentile * 4)/4
 
-table_s6_prep = sqldf("
+table_s4_prep = sqldf("
                       select   peptide, quartile, avg(ln_sd/ln_mean) mean_cv, avg(ln_mean) mean_ln
                       from     clin
                       where    ln_mean is not null and ln_sd is not null
                       group by 1, 2
                       order by 1, 2
                       ;")
-table_s6_prep
+table_s4_prep
 
-table_s6_left = dcast(table_s6_prep, peptide ~ quartile, value.var='mean_cv')
-table_s6_right = dcast(table_s6_prep, peptide ~ quartile, value.var='mean_ln')
+table_s4_left = dcast(table_s4_prep, peptide ~ quartile, value.var='mean_cv')
+table_s4_right = dcast(table_s4_prep, peptide ~ quartile, value.var='mean_ln')
 
 for (i in 2:5) {
-  table_s6_left[,i] = gsub(' ','',paste(formatC(table_s6_left[,i]*100, digits=1, format='f'),"%",sep="") )
+  table_s4_left[,i] = gsub(' ','',paste(formatC(table_s4_left[,i]*100, digits=1, format='f'),"%",sep="") )
 }
 
 for (i in 2:5) {
-  table_s6_right[,i] = formatC(table_s6_right[,i], format='f', digits=1)
+  table_s4_right[,i] = formatC(table_s4_right[,i], format='f', digits=1)
 }
 
-table_s6_joined = sqldf("
+table_s4_joined = sqldf("
                         select   p.ncorder, p.peptide, l.*, r.*
-                        from     peptides p, table_s6_left l, table_s6_right r
+                        from     peptides p, table_s4_left l, table_s4_right r
                         where    p.peptide = l.peptide and p.peptide = r.peptide
                         ;")
-table_s6_joined = table_s6_joined[,c(-3, -8)] # delete the extraneous "peptide" cols
-table_s6_joined = table_s6_joined[,-1] # delete the ncorder col
+table_s4_joined = table_s4_joined[,c(-3, -8)] # delete the extraneous "peptide" cols
+table_s4_joined = table_s4_joined[,-1] # delete the ncorder col
 
-colnames(table_s6_joined) = c('peptide','cv0_24','cv25_49','cv50_74','cv75_100','mean0_24','mean25_49','mean50_74','mean75_100')
+colnames(table_s4_joined) = c('peptide','cv0_24','cv25_49','cv50_74','cv75_100','mean0_24','mean25_49','mean50_74','mean75_100')
 
-write.table(table_s6_joined, 'display_items/script_generated/table-s6.tsv', sep='\t', col.names=T, row.names=F, quote=F)
-#### -- End Table S6
+write.table(table_s4_joined, 'display_items/script_generated/table-s4.tsv', sep='\t', col.names=T, row.names=F, quote=F)
+#### -- End Table S4
 
-
-
-
-
-
-
-#### Begin Table S7 -- Exactly table 1 but for L:H instead of L:15N
-
-table_s7_prep = sqldf("
-                      select   peptide, 
-                      avg(lh_sd / lh_mean) mean_intrarun_cv
-                      from     clin
-                      group by 1
-                      ;")
-
-table_s7_interindiv = sqldf("
-                            select   peptide, 
-                            stdev(lh_mean) / avg(lh_mean) interindiv_cv 
-                            from     clin
-                            group by 1
-                            ;")
-
-
-table_s7_interrun = sqldf("
-                          select   p.ncorder, ipc.peptide, stdev(ipc.mean_lh)/avg(ipc.mean_lh) mean_interrun_cv
-                          from     (select peptide, run, avg(lh) mean_lh from mrm_data where run in (16,17,18,19,20) and indiv_id=='9-IPC' group by 1, 2) ipc,
-                          peptides p
-                          where    p.peptide = ipc.peptide and p.human = 'yes'
-                          group by 1, 2
-                          order by 1, 2
-                          ;")
-
-table_s7_all = sqldf("
-                     select   p.ncorder, 
-                     p.codons, 
-                     p.peptide, 
-                     t1a.mean_intrarun_cv, 
-                     t1b.mean_interrun_cv,
-                     t1c.interindiv_cv
-                     from     table_s7_prep t1a, table_s7_interrun t1b, table_s7_interindiv t1c, peptides p
-                     where    t1a.peptide = t1b.peptide and t1a.peptide = p.peptide and t1c.peptide = p.peptide
-                     order by 1
-                     ;")
-
-table_s7_disp = table_s7_all[,c('codons','peptide','mean_intrarun_cv','mean_interrun_cv','interindiv_cv')]
-table_s7_disp$mean_intrarun_cv = gsub(' ','',paste(formatC(table_s7_disp$mean_intrarun_cv*100, digits=0, format='f'),"%",sep="") )
-table_s7_disp$mean_interrun_cv = gsub(' ','',paste(formatC(table_s7_disp$mean_interrun_cv*100, digits=0, format='f'),"%",sep="") )
-table_s7_disp$interindiv_cv = gsub(' ','',paste(formatC(table_s7_disp$interindiv_cv*100, digits=0, format='f'),"%",sep="") )
-table_s7_disp
-
-write.table(table_s7_disp, 'display_items/script_generated/table-s7.tsv', sep='\t', col.names=T, row.names=F, quote=F)
 
 
 
@@ -1379,222 +1326,6 @@ summary(anova)[[1]][["Pr(>F)"]]
 
 
 
-
-
-
-
-
-
-#### Begin Figure S7
-imgsave(paste('display_items/script_generated/figure-s07.',imgmode,sep=''),width=6.5*resx,height=8.5*resx,res=resx)
-
-layout_matrix = matrix(c(1,1,2,2,1,1,2,2,3,3,4,4,3,3,4,4,5,5,6,6,5,5,6,6,7,7,7,7),byrow=T,nrow=7)
-layout(layout_matrix)
-
-# Figure S6 requires access to raw Skyline data
-# load all MRM data into one table
-runs = read.table('data/meta/runs.tsv',sep='\t',header=T,quote='',comment.char='')
-if (exists('mrm_raw')) {
-  rm(mrm_raw)
-}
-for (batch in 1:5) {
-  rowno = which(runs$expt_no == batch + 15)
-  rawdat = read.table(paste('data/skyline/',runs$datafile[rowno],sep=''), sep=',',header=T,quote='',comment.char='')
-  rawdat$batch = batch
-  if (exists('mrm_raw')) {
-    mrm_raw = rbind(mrm_raw, rawdat)
-  } else {
-    mrm_raw = rawdat
-  }
-}
-colnames(mrm_raw) = gsub('[^a-z0-9_]','_',tolower(colnames(mrm_raw)))
-mrm_raw = subset(mrm_raw, peptide_sequence %in% peptides$peptide[peptides$human=='yes'])
-
-colnames(mrm_raw)
-mrm_raw$light_area = as.numeric(mrm_raw$light_area)
-mrm_raw$x15n_area = as.numeric(mrm_raw$x15n_area)
-mrm_raw$heavy_area = as.numeric(mrm_raw$heavy_area)
-
-pep_batch_totals = sqldf("
-select   batch,
-         peptide_sequence,
-         peptide_modified_sequence,
-         sum(light_area) l,
-         sum(x15n_area) n15,
-         sum(heavy_area) h,
-         sum(x15n_area/heavy_area) nh,
-         sum(light_area/x15n_area) ln,
-         sum(light_area/heavy_area) lh
-from     mrm_raw
-group by 1, 2, 3
-order by 1, 2, 3
-;")
-
-batch_totals = sqldf("
-select   batch,
-         sum(light_area) l,
-         sum(x15n_area) n15,
-         sum(heavy_area) h,
-         sum(x15n_area/heavy_area) nh,
-         sum(light_area/x15n_area) ln,
-         sum(light_area/heavy_area) lh
-from     mrm_raw
-group by 1
-order by 1
-;")
-
-pep_batch = sqldf("
-select   b.batch, p.ncorder,p.peptide, pb.peptide_modified_sequence, p.color,
-         pb.l/b.l lx,
-         pb.n15/b.n15 nx,
-         pb.h/b.h hx,
-         pb.nh/b.nh nhx,
-         pb.ln/b.ln lnx,
-         pb.lh/b.lh lhx
-from     peptides p, pep_batch_totals pb, batch_totals b
-where    p.peptide = pb.peptide_sequence
-and      pb.batch = b.batch
-order by 1, 2
-;")
-
-plot_params = sqldf("
-select   m.peptide_modified_sequence, p.peptide, p.ncorder, p.color
-from     mrm_raw m, peptides p
-where    m.peptide_sequence = p.peptide
-group by 1, 2
-order by 3
-;")
-plot_params$order_w_metox  = 1:7
-plot_params$angle = NA
-plot_params$density = NA
-plot_params$angle[plot_params$peptide_modified_sequence=='VVEQM[+16]C[+57]ITQYER'] = 45
-plot_params$density[plot_params$peptide_modified_sequence=='VVEQM[+16]C[+57]ITQYER'] = 40
-
-
-multiplot_params = data.frame(var=c('lx','nx','hx','nhx','lnx','lhx'),
-                              disp=c('light','15N','heavy','15N:heavy','light:15N','light:heavy'))
-par(mar=c(4,5,4,2))
-for (i in 1:nrow(multiplot_params)) {
-  var = multiplot_params$var[i]
-  x = dcast(pep_batch, formula = peptide_modified_sequence ~ batch, value.var=var)
-  x$order_w_metox = plot_params$order_w_metox[match(x$peptide_modified_sequence, plot_params$peptide_modified_sequence)]
-  x = x[order(x$order_w_metox),]
-  mat = as.matrix(x[,as.character(1:5)])
-  barplot(mat, col=plot_params$color, density=plot_params$density, angle=plot_params$angle, yaxt='n', border=NA)
-  axis(side=2, at=(0:4)/4, labels=percent((0:4)/4), lwd=1, lwd.ticks=1, las=2)
-  mtext(side=1, line=2.5, text='day number')
-  mtext(side=2, line=3.0, text='% of total')
-  mtext(side=3, line=1, text=multiplot_params$disp[i])
-  mtext(LETTERS[i], side=3, cex=2, adj = 0,0, line = 1.5)
-}
-
-# empty plot to hold master legend
-par(mar=c(1,2,1,2))
-plot(NA, NA, xlim=c(0,1), ylim=c(0,1), xaxs='i', yaxs='i', axes=F, ann=F)
-legend(x=0.0, y=1, cex=1.6, legend=plot_params$peptide_modified_sequence[1:4], fill=plot_params$color[1:4], text.col=plot_params$color[1:4], text.font=2, density=plot_params$density[1:4], angle=plot_params$angle[1:4], bty='n')
-legend(x=0.4, y=1, cex=1.6, legend=plot_params$peptide_modified_sequence[5:7], fill=plot_params$color[5:7], text.col=plot_params$color[5:7], text.font=2, density=plot_params$density[5:7], angle=plot_params$angle[5:7], bty='n')
-
-dev.off()
-#### End Figure S7
-
-
-
-
-
-
-
-
-imgsave(paste('display_items/script_generated/figure-s09.',imgmode,sep=''),width=6.5*resx,height=7*resx,res=resx)
-
-layout_matrix = matrix(c(1,2,3,4,5,6),nrow=3,byrow=T)
-layout(layout_matrix)
-
-
-for (i in 1:nrow(hupeps)) {
- subs = subset(clin, peptide==hupeps$peptide[i]) 
- m = lm(lh_mean ~ ln_mean, data=subs)
- slope = formatC(m$coefficients[2],format='f',digits=2)
- if (m$coefficients[1] < 0) {
-   intercept = formatC(-m$coefficients[1],format='f',digits=2)
-   equa = paste("y = ",slope,"x - ",intercept,sep="")
- } else {
-   intercept = formatC(m$coefficients[1],format='f',digits=2)
-   equa = paste("y = ",slope,"x + ",intercept,sep="")
- }
- rsq = paste("R^2 = ",formatC(summary(m)$adj.r.squared,format='f',digits=2),sep="")
- message = paste(equa, rsq, sep='\n')
- xlims = c(0, max(subs$ln_mean, na.rm=T)*1.05)
- ylims = c(0, max(subs$lh_mean, na.rm=T)*1.05)
- plot(subs$ln_mean, subs$lh_mean, pch=20, xlab='L:15N', ylab='L:H', main='', col=hupeps$color[i], axes=F, xlim=xlims, ylim=ylims, xaxs='i', yaxs='i')
- axis(side=1)
- axis(side=2, las=2)
- mtext(side=3, line=0.5, text=hupeps$peptide[i], col=hupeps$color[i], font=2)
- abline(m, lwd=1.5, col=hupeps$color[i])
- legend('topleft',message,cex=1,bty='n')
- mtext(LETTERS[i], side=3, cex=2, adj = 0,0, line = 1.5)
-}
-
-dev.off()
-
-
-
-
-
-
-
-imgsave(paste('display_items/script_generated/figure-s10.',imgmode,sep=''),width=6.5*resx,height=3.25*resx,res=resx)
-
-layout_matrix = matrix(c(1,2),nrow=1,byrow=T)
-layout(layout_matrix)
-
-par(mar=c(3,3,3,1))
-
-
-scatter_data = sqldf("
-  select   refpep.peptide refpeptide,
-           other.peptide otherpeptide,
-           other.color_pep color,
-           refpep.ln_mean refln,
-           refpep.lh_mean reflh,
-           other.ln_mean othln,
-           other.lh_mean othlh
-  from     clin refpep, clin other
-  where    refpep.indiv_id = other.indiv_id
-  and      refpep.peptide = 'VVEQMCITQYER'
-  and      other.peptide != 'VVEQMCITQYER'
-  ;")
-
-lims = c(0,55)
-xats = 0:60
-xbigs = (0:6)*10
-plot(NA, NA, xlim=lims, ylim=lims, xaxs='i', yaxs='i', ann=F, axes=F)
-axis(side=1, at=xats, labels=NA, lwd=1, lwd.ticks=1, tck=-0.025)
-axis(side=1, at=xbigs, labels=xbigs, lwd=0, lwd.ticks=1, tck=-0.050)
-axis(side=2, at=xats, labels=NA, lwd=1, lwd.ticks=1, tck=-0.025, las=2)
-axis(side=2, at=xbigs, labels=xbigs, lwd=0, lwd.ticks=1, tck=-0.050, las=2)
-mtext(side=1, line=2.0, text='reference peptide L:15N ratio')
-mtext(side=2, line=2.0, text='other peptide L:15N ratio')
-mtext(side=3, line=0, text='L:15N')
-points(x=scatter_data$refln, y=scatter_data$othln, col=scatter_data$color, pch=20, cex=0.75)
-legend('topleft', legend=hupeps$peptide[c(1,2,3,4,6)], pch=20, col=hupeps$color[c(1,2,3,4,6)], text.col=hupeps$color[c(1,2,3,4,6)], text.font=2, bty='n', cex=0.8)
-mtext('A', side=3, cex=2, adj = 0,0, line = 1.5)
-
-lims = c(0,15)
-xats = 0:15
-xbigs = (0:3)*5
-plot(NA, NA, xlim=lims, ylim=lims, xaxs='i', yaxs='i', ann=F, axes=F)
-axis(side=1, at=xats, labels=NA, lwd=1, lwd.ticks=1, tck=-0.025)
-axis(side=1, at=xbigs, labels=xbigs, lwd=0, lwd.ticks=1, tck=-0.050)
-axis(side=2, at=xats, labels=NA, lwd=1, lwd.ticks=1, tck=-0.025, las=2)
-axis(side=2, at=xbigs, labels=xbigs, lwd=0, lwd.ticks=1, tck=-0.050, las=2)
-mtext(side=1, line=2.0, text='reference peptide L:H ratio')
-mtext(side=2, line=2.0, text='other peptide L:H ratio')
-mtext(side=3, line=0, text='L:H')
-points(x=scatter_data$reflh, y=scatter_data$othlh, col=scatter_data$color, pch=20, cex=0.75)
-legend('topleft', legend=hupeps$peptide[c(1,2,3,4,6)], pch=20, col=hupeps$color[c(1,2,3,4,6)], text.col=hupeps$color[c(1,2,3,4,6)], text.font=2, bty='n', cex=0.8)
-mtext('B', side=3, cex=2, adj = 0,0, line = 1.5)
-
-dev.off()
 
 
 
