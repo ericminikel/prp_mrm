@@ -315,6 +315,7 @@ collapsed_ylims=c(-9.5,-.5)
 par(mar=c(5,10,5,2))
 xlims = c(0.5,3.0)
 species = c('human','cynomolgus','mouse','rat') # colnames(peptides)[4:7]
+colnames(peptides)[4:7] = species
 species_x = c(1,1.5,2,2.5)
 plot(NA,NA,xlim=xlims,ylim=collapsed_ylims,ann=FALSE,axes=FALSE,xaxs='i',yaxs='i')
 mtext(side=2,at=-peptides$allorder,text=peptides$peptide,col=peptides$color,font=1,las=2,cex=0.8)
